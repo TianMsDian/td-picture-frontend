@@ -98,6 +98,7 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import {getSpaceVoByIdUsingGet} from "@/api/spaceController";
 import {EditOutlined,FullscreenOutlined} from "@ant-design/icons-vue";
+import {SPACE_TYPE_ENUM} from "@/constants/space";
 
 const router = useRouter()
 const route = useRoute()
@@ -174,6 +175,7 @@ onMounted(() => {
   getTagCategoryOptions()
 })
 
+
 //获取老数据
 const getOldPicture = async () => {
   //获取到id
@@ -241,6 +243,8 @@ const fetchSpace = async () => {
 watchEffect(() => {
   fetchSpace()
 })
+
+
 </script>
 
 

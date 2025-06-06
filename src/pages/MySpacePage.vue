@@ -10,6 +10,7 @@ import { userLoginUserStore } from '@/stores/userLoginUserStore'
 import {listSpaceVoByPageUsingPost} from "@/api/spaceController";
 import {message} from "ant-design-vue";
 import {onMounted} from "vue";
+import {SPACE_TYPE_ENUM} from "@/constants/space";
 
 
 const router = useRouter();
@@ -29,6 +30,7 @@ const res = await listSpaceVoByPageUsingPost({
   userId: loginUser.id,
   current: 1,
   pageSize: 1,
+  spaceType: SPACE_TYPE_ENUM.PRIVATE
 })
   if (res.data.code === 0){
     // ? 是可选列操作符

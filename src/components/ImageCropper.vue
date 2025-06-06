@@ -1,5 +1,4 @@
 <template>
-<!--  http://github.com/xyxiao001/vue-cropper 一个优雅的图片裁剪插件-->
   <a-modal
     class="image-cropper"
     v-model:visible="visible"
@@ -47,7 +46,7 @@
 import { computed, onUnmounted, ref, watchEffect } from 'vue'
 import { uploadPictureUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
-import { userLoginUserStore } from '@/stores/userLoginUserStore';
+import { userLoginUserStore } from '@/stores/userLoginUserStore.ts'
 import PictureEditWebSocket from '@/utils/pictureEditWebSocket.ts'
 import { PICTURE_EDIT_ACTION_ENUM, PICTURE_EDIT_MESSAGE_TYPE_ENUM } from '@/constants/picture.ts'
 import { SPACE_TYPE_ENUM } from '@/constants/space.ts'

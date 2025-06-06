@@ -8,29 +8,30 @@ import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
 // @ts-ignore
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
 // @ts-ignore
-import AddPicturePage from "@/pages/AddPicturePage.vue";
+import AddPicturePage from '@/pages/AddPicturePage.vue'
 // @ts-ignore
-import PictureManagePage from "@/pages/admin/PictureManagePage.vue";
+import PictureManagePage from '@/pages/admin/PictureManagePage.vue'
 // @ts-ignore
-import HomePage from "@/pages/HomePage.vue";
+import HomePage from '@/pages/HomePage.vue'
 // @ts-ignore
-import PictureDetailPage from "@/pages/PictureDetailPage.vue";
+import PictureDetailPage from '@/pages/PictureDetailPage.vue'
 // @ts-ignore
-import AddPictureBatchPage from "@/pages/AddPictureBatchPage.vue";
+import AddPictureBatchPage from '@/pages/AddPictureBatchPage.vue'
 // @ts-ignore
-import SpaceManagePage from "@/pages/admin/SpaceManagePage.vue";
+import SpaceManagePage from '@/pages/admin/SpaceManagePage.vue'
 // @ts-ignore
-import AddSpacePage from "@/pages/AddSpacePage.vue";
+import AddSpacePage from '@/pages/AddSpacePage.vue'
 // @ts-ignore
-import MySpacePage from "@/pages/MySpacePage.vue";
+import MySpacePage from '@/pages/MySpacePage.vue'
 // @ts-ignore
-import SpaceDetailPage from "@/pages/SpaceDetailPage.vue";
+import SpaceDetailPage from '@/pages/SpaceDetailPage.vue'
 // @ts-ignore
+import SearchPicturePage from '@/pages/SearchPicturePage.vue'
+// @ts-ignore
+import SpaceAnalyzePage from '@/pages/SpaceAnalyzePage.vue'
+// @ts-ignore
+import SpaceUserManagePage from '@/pages/admin/SpaceUserManagePage.vue'
 
-import SearchPicturePage from "@/pages/SearchPicturePage.vue";
-
-// @ts-ignore
-// @ts-ignore
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -65,6 +66,12 @@ const router = createRouter({
       component: SpaceManagePage,
     },
     {
+      path: '/spaceUserManage/:id',
+      name: '空间成员管理',
+      component: SpaceUserManagePage,
+      props: true,
+    },
+    {
       path: '/add_picture',
       name: '创建图片',
       component: AddPicturePage,
@@ -79,6 +86,11 @@ const router = createRouter({
       name: '图片详情',
       component: PictureDetailPage,
       props: true,
+    },
+    {
+      path: '/space_analyze',
+      name: '空间分析',
+      component: SpaceAnalyzePage,
     },
     {
       path: '/add_space',

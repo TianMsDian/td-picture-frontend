@@ -4,13 +4,35 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }} ({{ SPACE_TYPE_MAP[space.spaceType] }})</h2>
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank">
+        <a-button
+          v-if="canUploadPicture"
+          type="primary"
+          :href="`/add_picture?spaceId=${id}`"
+          target="_blank"
+        >
           + 创建图片
         </a-button>
         <a-button
-          :icon="h(EditOutlined)"
-          @click="doBatchEdit"> 批量编辑
+          v-if="canManageSpaceUser"
+          type="primary"
+          ghost
+          :icon="h(TeamOutlined)"
+          :href="`/spaceUserManage/${id}`"
+          target="_blank"
+        >
+          成员管理
         </a-button>
+        <a-button
+          v-if="canManageSpaceUser"
+          type="primary"
+          ghost
+          :icon="h(BarChartOutlined)"
+          :href="`/space_analyze?spaceId=${id}`"
+          target="_blank"
+        >
+          空间分析
+        </a-button>
+        <a-button v-if="canEditPicture" :icon="h(EditOutlined)" @click="doBatchEdit"> 批量编辑</a-button>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
         >
@@ -31,7 +53,14 @@
       <color-picker format="hex" @pureColorChange="onColorChange" />
     </a-form-item>
     <!--  图片列表  -->
-    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData" />
+    <PictureList
+      :dataList="dataList"
+      :loading="loading"
+      :showOp="true"
+      :canEdit="canEditPicture"
+      :canDelete="canDeletePicture"
+      :onReload="fetchData"
+    />
     <!--  分页  -->
     <a-pagination
       style="text-align: right"
@@ -40,28 +69,31 @@
       :total="total"
       @change="onPageChange"
     />
-    <BatchEditPictureModal  ref="batchEditPictureModalRef"
-                            :spaceId="id"
-                            :pictureList="dataList"
-                            :onSuccess="onBatchEditPictureSuccess"
+    <BatchEditPictureModal
+      ref="batchEditPictureModalRef"
+      :spaceId="id"
+      :pictureList="dataList"
+      :onSuccess="onBatchEditPictureSuccess"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, h, onMounted, reactive, ref, watch} from 'vue'
+import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
-import {listPictureVoByPageUsingPost, searchPictureByColorUsingPost} from '@/api/pictureController'
+import {
+  listPictureVoByPageUsingPost,
+  searchPictureByColorUsingPost,
+} from '@/api/pictureController'
 import { formatSize } from '@/utils'
-import {SPACE_PERMISSION_ENUM, SPACE_TYPE_MAP} from '../constants/space'
+import { SPACE_PERMISSION_ENUM, SPACE_TYPE_MAP } from '../constants/space'
 import PictureList from '@/components/PictureList.vue'
 import PictureSearchForm from '@/components/PictureSearchForm.vue'
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
-import BatchEditPictureModal from "@/components/BatchEditPictureModal.vue";
-import {EditOutlined} from "@ant-design/icons-vue";
-
+import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
+import { EditOutlined, BarChartOutlined, TeamOutlined } from '@ant-design/icons-vue'
 
 interface Props {
   id: string | number
@@ -99,34 +131,18 @@ const fetchSpaceDetail = async () => {
   }
 }
 
-// -------------获取空间详情-------------
-const factchSpaceDetail = async () => {
-  try {
-    const res = await getSpaceVoByIdUsingGet({
-      id: props.id,
-    })
-    if (res.data.code === 0 && res.data.data) {
-      space.value = res.data.data
-    } else {
-      message.error('获取空间详情页:' + res.data.message)
-    }
-  } catch (e: any) {
-    message.error('获取空间详情页:' + e.data.message)
-  }
-}
-//首次进入页面获取
 onMounted(() => {
-  factchSpaceDetail()
+  fetchSpaceDetail()
 })
 
-// --------------获取图片列表--------------
-//定义数据
+// --------- 获取图片列表 --------
+
+// 定义数据
 const dataList = ref<API.PictureVO[]>([])
 const total = ref(0)
 const loading = ref(true)
+
 // 搜索条件
-//  如果里面的属性会发生改变或操作最好就用reactive
-// ref 定义的数据 后面代码调用就必须要要加.value
 const searchParams = ref<API.PictureQueryRequest>({
   current: 1,
   pageSize: 12,
@@ -134,10 +150,10 @@ const searchParams = ref<API.PictureQueryRequest>({
   sortOrder: 'descend',
 })
 
-//获取数据
+// 获取数据
 const fetchData = async () => {
   loading.value = true
-  //转换搜索参数  分类
+  // 转换搜索参数
   const params = {
     spaceId: props.id,
     ...searchParams.value,
@@ -147,18 +163,16 @@ const fetchData = async () => {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
   } else {
-    message.error('获取数据失败,' + res.data.message)
+    message.error('获取数据失败，' + res.data.message)
   }
   loading.value = false
 }
 
-//页面加载时获取数据  请求一次
+// 页面加载时获取数据，请求一次
 onMounted(() => {
   fetchData()
 })
 
-//分页参数 不是响应式变量，上面的值如果改变这里也不会改
-//computed 计算属性
 // 分页参数
 const onPageChange = (page: number, pageSize: number) => {
   searchParams.value.current = page
@@ -168,12 +182,14 @@ const onPageChange = (page: number, pageSize: number) => {
 
 // 搜索
 const onSearch = (newSearchParams: API.PictureQueryRequest) => {
+  console.log('new', newSearchParams)
 
   searchParams.value = {
     ...searchParams.value,
     ...newSearchParams,
-    current:1,
+    current: 1,
   }
+  console.log('searchparams', searchParams.value)
   fetchData()
 }
 
@@ -199,7 +215,7 @@ const batchEditPictureModalRef = ref()
 
 // 批量编辑图片成功
 const onBatchEditPictureSuccess = () => {
-  fetchData() // 重新获取数据
+  fetchData()
 }
 
 // 打开批量编辑图片弹窗
@@ -217,9 +233,9 @@ watch(
     fetchData()
   },
 )
-
 </script>
 <style scoped>
-#spaceDetailPa {
+#spaceDetailPage {
+  margin-bottom: 16px;
 }
 </style>

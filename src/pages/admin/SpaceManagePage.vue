@@ -3,18 +3,16 @@
     <a-flex justify="space-between">
       <h2>空间管理</h2>
       <a-space>
-        <a-button type="primary" href="/add_space" >+ 创建空间</a-button>
+        <a-button type="primary" href="/add_space">+ 创建空间</a-button>
+        <a-button type="primary" ghost href="/space_analyze?queryPublic=1">分析公共图库</a-button>
+        <a-button type="primary" ghost href="/space_analyze?queryAll=1">分析全部空间</a-button>
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px"></div>
     <!--  搜索表单  -->
-    <a-form layout="inline" :model="searchParams" @finish="doSearch" >
+    <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="空间名称">
-        <a-input
-          v-model:value="searchParams.spaceName"
-          placeholder="请输入空间名称"
-          allow-clear
-        />
+        <a-input v-model:value="searchParams.spaceName" placeholder="请输入空间名称" allow-clear />
       </a-form-item>
       <a-form-item name="spaceLevel" label="空间级别">
         <a-select
@@ -22,6 +20,15 @@
           style="min-width: 180px"
           placeholder="请输入空间级别"
           :options="SPACE_LEVEL_OPTIONS"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item name="spaceType" label="空间类别">
+        <a-select
+          v-model:value="searchParams.spaceType"
+          style="min-width: 180px"
+          placeholder="请输入空间类别"
+          :options="SPACE_TYPE_OPTIONS"
           allow-clear
         />
       </a-form-item>
@@ -45,10 +52,12 @@
         <template v-if="column.dataIndex === 'spaceLevel'">
           <div>审核状态: {{ SPACE_LEVEL_MAP[record.spaceLevel] }}</div>
         </template>
-
+        <template v-if="column.dataIndex === 'spaceType'">
+          <a-tag>{{ SPACE_TYPE_MAP[record.spaceType] }}</a-tag>
+        </template>
         <template v-if="column.dataIndex === 'spaceUserInfo'">
-          <div>大小: {{ formatSize(record.totalSize) }} / {{formatSize(record.maxSize)}}</div>
-          <div>数量: {{ record.totalCount }} / {{record.maxCount}}</div>
+          <div>大小: {{ formatSize(record.totalSize) }} / {{ formatSize(record.maxSize) }}</div>
+          <div>数量: {{ record.totalCount }} / {{ record.maxCount }}</div>
         </template>
         <!--    创建 与 修改时间    -->
         <template v-if="column.dataIndex === 'createTime'">
@@ -60,6 +69,9 @@
         <template v-else-if="column.key === 'action'">
           <!--  wrap 宽度不够自动换行-->
           <a-space wrap>
+            <a-button type="link" :href="`/space_analyze?spaceId=${record.id}`" target="_blank">
+              分析
+            </a-button>
             <a-button type="link" :href="`/add_Space?id=${record.id}`" target="_blank">
               编辑
             </a-button>
@@ -72,15 +84,11 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import {
-  deleteSpaceUsingPost,
-  listSpaceByPageUsingPost,
-} from '@/api/spaceController.ts'
+import { deleteSpaceUsingPost, listSpaceByPageUsingPost } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import {SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS} from "../../constants/space";
-import {formatSize} from "../../utils";
-
+import {SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS, SPACE_TYPE_MAP, SPACE_TYPE_OPTIONS} from '../../constants/space'
+import { formatSize } from '../../utils'
 
 const columns = [
   {
@@ -193,5 +201,4 @@ const doDelete = async (id: string) => {
     message.error('删除失败')
   }
 }
-
 </script>
